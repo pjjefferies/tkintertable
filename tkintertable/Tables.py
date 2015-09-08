@@ -157,13 +157,15 @@ class TableCanvas(Canvas):
         #if not hasattr(self,'parentapp'):
         #    self.parentapp = self.parentframe
 
-        self.parentframe.master.bind_all("<Right>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<Left>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<Up>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<Down>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<KP_8>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<Return>", self.handle_arrow_keys)
-        self.parentframe.master.bind_all("<Tab>", self.handle_arrow_keys)
+        # daniel has removed the parent specification
+        # for corpkit for the below bindings
+        self.bind_all("<Right>", self.handle_arrow_keys)
+        self.bind_all("<Left>", self.handle_arrow_keys)
+        self.bind_all("<Up>", self.handle_arrow_keys)
+        self.bind_all("<Down>", self.handle_arrow_keys)
+        self.bind_all("<KP_8>", self.handle_arrow_keys)
+        self.bind_all("<Return>", self.handle_arrow_keys)
+        self.bind_all("<Tab>", self.handle_arrow_keys)
         #if 'windows' in self.platform:
         self.bind("<MouseWheel>", self.mouse_wheel)
         self.bind('<Button-4>', self.mouse_wheel)
