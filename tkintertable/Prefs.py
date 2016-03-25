@@ -40,11 +40,9 @@ class Preferences:
             if self.noprefs == True:
                 raise
         except:
-
             # If we didn't find a file then set to default and save
-            print 'Did not find preferences!!!'
+            print('Did not find preferences!!!')
             self.prefs=defaults.copy()
-	    print dirs
             self.pref_file=os.path.join(dirs[0],filename)
             self.prefs['_prefdir']=dirs[0]
             self.prefs['_preffile']=self.pref_file
@@ -52,9 +50,9 @@ class Preferences:
 
             # Defaults savedir?
 
-            if os.environ.has_key('HOMEPATH'):
+            if 'HOMEPATH' in os.environ:
                 self.prefs['datadir']=os.environ['HOMEPATH']
-            if os.environ.has_key('HOME'):
+            if 'HOME' in os.environ:
                 self.prefs['datadir']=os.environ['HOME']
 
             # Use 'my documents' if available
@@ -82,18 +80,18 @@ class Preferences:
 
     def get(self,key):
 
-        if self.prefs.has_key(key):
+        if key in self.prefs:
             return self.prefs[key]
         else:
-            raise NameError,'No such key'
+            raise NameError('No such key')
         return
 
 
     def delete(self,key):
-        if self.prefs.has_key(key):
+        if key in self.prefs:
             del self.prefs[key]
         else:
-            raise 'No such key',key
+            raise ValueError('Error.')
         self.save_prefs()
         return
 
@@ -105,10 +103,10 @@ class Preferences:
         keys=['HOME','HOMEPATH','HOMEDRIVE']
         import os, sys
         for key in keys:
-            if os.environ.has_key(key):
+            if key in os.environ:
                 dirs.append(os.environ[key])
 
-        if os.environ.has_key('HOMEPATH'):
+        if 'HOMEPATH' in os.environ:
             # windows
             dirs.append(os.environ['HOMEPATH'])
 
@@ -146,11 +144,14 @@ class Preferences:
         """Save prefs"""
         import pickle
         try:
-            fd=open(self.pref_file,'w')
+            fd=open(self.pref_file,'wb')
         except:
-            print 'could not save'
+            print('could not save')
             return
-
+        #import sys
+        #if sys.version_info >= (3, 0):
+            pickle.dump(self.prefs.decode('utf-8'),fd)
+        #else:
         pickle.dump(self.prefs,fd)
         fd.close()
         return

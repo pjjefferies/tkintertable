@@ -19,7 +19,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Tkinter import *
+try:
+    import Tkinter as tkinter
+    from Tkinter import *
+except:
+    import tkinter as tkinter
+    from tkinter import *
 import Pmw
 from types import *
 import re
@@ -71,7 +76,7 @@ def isnumber(v1,v2):
 
 def regex(v1,v2):
     """Apply a regular expression"""
-    print re.findall(v1,v2)
+    print(re.findall(v1,v2))
     return
 
 operatornames = {'=':equals,'!=':notequals,

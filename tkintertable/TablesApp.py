@@ -19,17 +19,22 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Tkinter import *
+try:
+    import Tkinter as tkinter
+    from Tkinter import *
+except:
+    import tkinter as tkinter
+    from tkinter import *
 import Pmw
-import tkFileDialog, tkMessageBox, tkSimpleDialog
+import tkinter.filedialog, tkinter.messagebox, tkinter.simpledialog
 import re
 import os
 import time
 import pickle
-from Custom import MyTable
-from TableModels import TableModel
-from Tables_IO import TableImporter
-from Prefs import Preferences
+from .Custom import MyTable
+from .TableModels import TableModel
+from .Tables_IO import TableImporter
+from .Prefs import Preferences
 
 class TablesApp(Frame):
     """
@@ -130,7 +135,7 @@ class TablesApp(Frame):
     def create_pulldown(self,menu,dict):
         """ Create a pulldown in var from the info in dict  """
         var=Menu(menu,tearoff=0)
-        items=dict.keys()
+        items=list(dict.keys())
         items.sort()
         for item in items:
             if item[-3:]=='sep':
@@ -138,11 +143,11 @@ class TablesApp(Frame):
             else:
                 # Do we have a command?
                 command=None
-                if dict[item].has_key('cmd'):
+                if 'cmd' in dict[item]:
                     command=dict[item]['cmd']
 
                 # Put the command in there
-                if dict[item].has_key('sc'):
+                if 'sc' in dict[item]:
                     var.add_command(label='%-25s %9s' %(item[2:],dict[item]['sc']),command=command)
                 else:
                     var.add_command(label='%-25s' %(item[2:]),command=command)
@@ -172,7 +177,7 @@ class TablesApp(Frame):
         """Setup default prefs file if any of the keys are not present"""
         defaultprefs = {'textsize':14,
                          'windowwidth': 800 ,'windowheight':600}
-        for prop in defaultprefs.keys():
+        for prop in list(defaultprefs.keys()):
             try:
                 self.preferences.get(prop)
             except:
@@ -197,12 +202,12 @@ class TablesApp(Frame):
         self.notebook = Pmw.NoteBook(self.tablesapp_win, raisecommand=self.setcurrenttable)
         self.notebook.pack(fill='both', expand=1, padx=4, pady=4)
         if data !=None:
-            for s in data.keys():
+            for s in list(data.keys()):
                 sdata = data[s]
                 try:
                     self.add_Sheet(s ,sdata)
                 except:
-                    print 'skipping'
+                    print('skipping')
         else:
             #do the table adding stuff for the initial sheet
             self.add_Sheet('sheet1')
@@ -211,7 +216,7 @@ class TablesApp(Frame):
 
     def open_project(self, filename=None):
         if filename == None:
-            filename=tkFileDialog.askopenfilename(defaultextension='.tblprj"',
+            filename=tkinter.filedialog.askopenfilename(defaultextension='.tblprj"',
                                                       initialdir=os.getcwd(),
                                                       filetypes=[("TableApp project","*.tblprj"),
                                                                  ("All files","*.*")],
@@ -236,13 +241,13 @@ class TablesApp(Frame):
 
     def save_as_project(self):
         """Save as a new filename"""
-        filename=tkFileDialog.asksaveasfilename(parent=self.tablesapp_win,
+        filename=tkinter.filedialog.asksaveasfilename(parent=self.tablesapp_win,
                                                 defaultextension='.tblprj',
                                                 initialdir=self.defaultsavedir,
                                                 filetypes=[("TableApp project","*.tblprj"),
                                                            ("All files","*.*")])
         if not filename:
-            print 'Returning'
+            print('Returning')
             return
         self.filename=filename
         self.do_save_project(self.filename)
@@ -251,7 +256,7 @@ class TablesApp(Frame):
     def do_save_project(self, filename):
         """Get model dicts and write all to pickle file"""
         data={}
-        for s in self.sheets.keys():
+        for s in list(self.sheets.keys()):
             currtable = self.sheets[s]
             model = currtable.getModel()
             data[s] = model.getData()
@@ -281,7 +286,7 @@ class TablesApp(Frame):
         return
 
     def export_csv(self):
-        from Tables_IO import TableExporter
+        from .Tables_IO import TableExporter
         exporter = TableExporter()
         exporter.ExportTableData(self.currenttable)
         return
@@ -290,14 +295,14 @@ class TablesApp(Frame):
         """Add a new sheet - handles all the table creation stuff"""
         def checksheet_name(name):
             if name == '':
-                tkMessageBox.showwarning("Whoops", "Name should not be blank.")
+                tkinter.messagebox.showwarning("Whoops", "Name should not be blank.")
                 return 0
-            if self.sheets.has_key(name):
-                tkMessageBox.showwarning("Name exists", "Sheet name already exists!")
+            if name in self.sheets:
+                tkinter.messagebox.showwarning("Name exists", "Sheet name already exists!")
                 return 0
         noshts = len(self.notebook.pagenames())
         if sheetname == None:
-            sheetname = tkSimpleDialog.askstring("New sheet name?", "Enter sheet name:",
+            sheetname = tkinter.simpledialog.askstring("New sheet name?", "Enter sheet name:",
                                                 initialvalue='sheet'+str(noshts+1))
         checksheet_name(sheetname)
         page = self.notebook.add(sheetname)
@@ -336,7 +341,7 @@ class TablesApp(Frame):
     def rename_Sheet(self):
         """Rename a sheet"""
         s = self.notebook.getcurselection()
-        newname = tkSimpleDialog.askstring("New sheet name?", "Enter new sheet name:",
+        newname = tkinter.simpledialog.askstring("New sheet name?", "Enter new sheet name:",
                                                 initialvalue=s)
         if newname == None:
             return
@@ -427,7 +432,7 @@ class TablesApp(Frame):
         self.ab_win.geometry('+100+350')
         self.ab_win.title('About TablesApp')
 
-        import Table_images
+        from . import Table_images
         logo = Table_images.tableapp_logo()
         label = Label(self.ab_win,image=logo)
         label.image = logo
@@ -461,7 +466,7 @@ class ToolBar(Frame):
     """Uses the parent instance to provide the functions"""
     def __init__(self, parent=None, parentapp=None):
         Frame.__init__(self, parent, width=600, height=40)
-        import Table_images
+        from . import Table_images
         self.parentframe = parent
         self.parentapp = parentapp
         #add buttons

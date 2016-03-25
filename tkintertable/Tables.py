@@ -18,13 +18,22 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-
-from Tkinter import *
-from TableModels import TableModel
-from TableFormula import Formula
-from Prefs import Preferences
-import tkFileDialog, tkMessageBox, tkSimpleDialog
-import tkFont
+try:
+    import Tkinter as tkinter
+    from Tkinter import *
+except:
+    import tkinter as tkinter
+    from tkinter import *
+from .TableModels import TableModel
+from .TableFormula import Formula
+from .Prefs import Preferences
+try:
+    import tkMessageBox as messagebox
+    import tkSimpleDialog as simpledialog
+    import tkFileDialog as filedialog
+    import tkFont as font
+except:
+    import tkinter.filedialog, tkinter.messagebox, tkinter.simpledialog, tkinter.font
 import math, time
 import os, types
 import string, copy
@@ -113,7 +122,7 @@ class TableCanvas(Canvas):
     def setFontSize(self):
         """Set font size to match font, we need to get rid of fontsize as
             a separate variable?"""
-        if hasattr(self, 'thefont') and type(self.thefont) is types.TupleType:
+        if hasattr(self, 'thefont') and type(self.thefont) is tuple:
             self.fontsize = self.thefont[1]
         return
 
@@ -149,23 +158,23 @@ class TableCanvas(Canvas):
         self.bind('<B1-Motion>', self.handle_mouse_drag)
         self.bind('<Motion>', self.handle_motion)
 
-        self.bind_all("<Control-x>", self.deleteRow)
-        self.bind_all("<Control-n>", self.addRow)
-        self.bind_all("<Delete>", self.clearData)
-        self.bind_all("<Control-v>", self.paste)
+        self.bind("<Control-x>", self.deleteRow)
+        self.bind("<Control-n>", self.addRow)
+        self.bind("<Delete>", self.clearData)
+        self.bind("<Control-v>", self.paste)
 
         #if not hasattr(self,'parentapp'):
         #    self.parentapp = self.parentframe
 
         # daniel has removed the parent specification
         # for corpkit for the below bindings
-        self.bind_all("<Right>", self.handle_arrow_keys)
-        self.bind_all("<Left>", self.handle_arrow_keys)
-        self.bind_all("<Up>", self.handle_arrow_keys)
-        self.bind_all("<Down>", self.handle_arrow_keys)
-        self.bind_all("<KP_8>", self.handle_arrow_keys)
-        self.bind_all("<Return>", self.handle_arrow_keys)
-        self.bind_all("<Tab>", self.handle_arrow_keys)
+        #self.bind("<Right>", self.handle_arrow_keys)
+        #self.bind("<Left>", self.handle_arrow_keys)
+        #self.bind("<Up>", self.handle_arrow_keys)
+        #self.bind("<Down>", self.handle_arrow_keys)
+        #self.bind("<KP_8>", self.handle_arrow_keys)
+        self.bind("<Return>", self.handle_arrow_keys)
+        self.bind("<Tab>", self.handle_arrow_keys)
         #if 'windows' in self.platform:
         self.bind("<MouseWheel>", self.mouse_wheel)
         self.bind('<Button-4>', self.mouse_wheel)
@@ -187,7 +196,7 @@ class TableCanvas(Canvas):
         try:
             namefield=self.namefield
         except:
-            namefield=data.keys()[0]
+            namefield=list(data.keys())[0]
         self.model = TableModel()
         self.model.importDict(data, namefield=namefield)
         self.model.setSortOrder(0,reverse=self.reverseorder)
@@ -289,15 +298,15 @@ class TableCanvas(Canvas):
             self.rows = len(self.model.filteredrecs)
             self.delete('colrect')
 
-        self.rowrange = range(0,self.rows)
+        self.rowrange = list(range(0,self.rows))
         self.configure(scrollregion=(0,0, self.tablewidth+self.x_start,
                 self.rowheight*self.rows+10))
 
         x1, y1, x2, y2 = self.getVisibleRegion()
         startvisiblerow, endvisiblerow = self.getVisibleRows(y1, y2)
-        self.visiblerows = range(startvisiblerow, endvisiblerow)
+        self.visiblerows = list(range(int(startvisiblerow), int(endvisiblerow)))
         startvisiblecol, endvisiblecol = self.getVisibleCols(x1, x2)
-        self.visiblecols = range(startvisiblecol, endvisiblecol)
+        self.visiblecols = list(range(int(startvisiblecol), int(endvisiblecol)))
 
         if self.cols == 0 or self.rows == 0:
             self.delete('entry')
@@ -365,7 +374,7 @@ class TableCanvas(Canvas):
         scale = 8.5 * float(fontsize)/12
         for col in range(self.cols):
             colname = self.model.getColumnName(col)
-            if self.model.columnwidths.has_key(colname):
+            if colname in self.model.columnwidths:
                 w = self.model.columnwidths[colname]
             else:
                 w = self.cellwidth
@@ -393,7 +402,7 @@ class TableCanvas(Canvas):
         self.col_positions.append(x_pos)
         for col in range(self.cols):
             colname=self.model.getColumnName(col)
-            if self.model.columnwidths.has_key(colname):
+            if colname in self.model.columnwidths:
                 x_pos=x_pos+self.model.columnwidths[colname]
             else:
                 x_pos=x_pos+w
@@ -411,15 +420,15 @@ class TableCanvas(Canvas):
 
     def set_xviews(self,*args):
         """Set the xview of table and col header"""
-        apply(self.xview,args)
-        apply(self.tablecolheader.xview,args)
+        self.xview(*args)
+        self.tablecolheader.xview(*args)
         self.redrawVisible()
         return
 
     def set_yviews(self,*args):
         """Set the xview of table and row header"""
-        apply(self.yview,args)
-        apply(self.tablerowheader.yview,args)
+        self.yview(*args)
+        self.tablerowheader.yview(*args)
         self.redrawVisible()
         return
 
@@ -433,7 +442,7 @@ class TableCanvas(Canvas):
     def addRows(self, num=None):
         """Add new rows"""
         if num == None:
-            num = tkSimpleDialog.askinteger("Now many rows?",
+            num = tkinter.simpledialog.askinteger("Now many rows?",
                                             "Number of rows:",initialvalue=1,
                                              parent=self.parentframe)
         if not num:
@@ -446,7 +455,7 @@ class TableCanvas(Canvas):
     def addColumn(self, newname=None):
         """Add a new column"""
         if newname == None:
-            from Dialogs import MultipleValDialog
+            from .Dialogs import MultipleValDialog
             coltypes = self.getModel().getDefaultTypes()
             d = MultipleValDialog(title='New Column',
                                     initialvalues=(coltypes, ''),
@@ -461,7 +470,7 @@ class TableCanvas(Canvas):
 
         if newname != None:
             if newname in self.getModel().columnNames:
-                tkMessageBox.showwarning("Name exists",
+                tkinter.messagebox.showwarning("Name exists",
                                          "Name already exists!",
                                          parent=self.parentframe)
             else:
@@ -473,7 +482,7 @@ class TableCanvas(Canvas):
     def deleteRow(self):
         """Delete a row"""
         if len(self.multiplerowlist)>1:
-            n = tkMessageBox.askyesno("Delete",
+            n = tkinter.messagebox.askyesno("Delete",
                                       "Delete Selected Records?",
                                       parent=self.parentframe)
             if n == True:
@@ -483,7 +492,7 @@ class TableCanvas(Canvas):
                 self.setSelectedRow(0)
                 self.redrawTable()
         else:
-            n = tkMessageBox.askyesno("Delete",
+            n = tkinter.messagebox.askyesno("Delete",
                                       "Delete This Record?",
                                       parent=self.parentframe)
             if n:
@@ -496,7 +505,7 @@ class TableCanvas(Canvas):
 
     def deleteColumn(self):
         """Delete currently selected column"""
-        n =  tkMessageBox.askyesno("Delete",
+        n =  tkinter.messagebox.askyesno("Delete",
                                    "Delete This Column?",
                                    parent=self.parentframe)
         if n:
@@ -508,7 +517,7 @@ class TableCanvas(Canvas):
 
     def deleteCells(self, rows, cols):
         """Clear the cell contents"""
-        n =  tkMessageBox.askyesno("Clear Confirm",
+        n =  tkinter.messagebox.askyesno("Clear Confirm",
                                    "Clear this data?",
                                    parent=self.parentframe)
         if not n:
@@ -530,7 +539,7 @@ class TableCanvas(Canvas):
     def autoAddColumns(self, numcols=None):
         """Automatically add x number of cols"""
         if numcols == None:
-            numcols = tkSimpleDialog.askinteger("Auto add rows.",
+            numcols = tkinter.simpledialog.askinteger("Auto add rows.",
                                                 "How many empty columns?",
                                                 parent=self.parentframe)
         self.model.auto_AddColumns(numcols)
@@ -543,7 +552,7 @@ class TableCanvas(Canvas):
         model = self.model
         #We need a custom dialog for allowing field entries here
         #absrow = self.get_AbsoluteRow(row)
-        from Dialogs import RecordViewDialog
+        from .Dialogs import RecordViewDialog
         d = RecordViewDialog(title="Record Details",
                                   parent=self.parentframe, table=self, row=row)
         return
@@ -551,7 +560,7 @@ class TableCanvas(Canvas):
     def findValue(self, searchstring=None, findagain=None):
         """Return the row/col for the input value"""
         if searchstring == None:
-            searchstring = tkSimpleDialog.askstring("Search table.",
+            searchstring = tkinter.simpledialog.askstring("Search table.",
                                                "Enter search value",
                                                parent=self.parentframe)
         found=0
@@ -567,7 +576,7 @@ class TableCanvas(Canvas):
                     if findagain == 1 and cell in self.foundlist:
                         continue
                     if text.lower().find(searchstring.lower())!=-1:
-                        print 'found in',row,col
+                        print('found in',row,col)
                         found=1
                         #highlight cell
                         self.delete('searchrect')
@@ -585,7 +594,7 @@ class TableCanvas(Canvas):
                         return row, col
         if found==0:
             self.delete('searchrect')
-            print 'nothing found'
+            print('nothing found')
             return None
 
     def showAll(self):
@@ -618,7 +627,7 @@ class TableCanvas(Canvas):
             parent.geometry('+%s+%s' %(x,y+h))
         if fields == None:
             fields = self.model.columnNames
-        from Filtering import FilterFrame
+        from .Filtering import FilterFrame
         self.filterframe = FilterFrame(parent, fields,
                                        self.doFilter, self.closeFilterFrame)
         self.filterframe.pack()
@@ -749,18 +758,18 @@ class TableCanvas(Canvas):
         """Select all rows and cells"""
         self.startrow = 0
         self.endrow = self.rows
-        self.multiplerowlist = range(self.startrow,self.endrow)
+        self.multiplerowlist = list(range(self.startrow,self.endrow))
         self.drawMultipleRows(self.multiplerowlist)
         self.startcol = 0
         self.endcol = self.cols
-        self.multiplecollist = range(self.startcol, self.endcol)
+        self.multiplecollist = list(range(self.startcol, self.endcol))
         self.drawMultipleCells()
         return
 
     def getCellCoords(self, row, col):
         """Get x-y coordinates to drawing a cell in a given row/col"""
         colname=self.model.getColumnName(col)
-        if self.model.columnwidths.has_key(colname):
+        if colname in self.model.columnwidths:
             w=self.model.columnwidths[colname]
         else:
             w=self.cellwidth
@@ -925,16 +934,16 @@ class TableCanvas(Canvas):
         else:
             self.endcol = colover
             if self.endcol < self.startcol:
-                self.multiplecollist=range(self.endcol, self.startcol+1)
+                self.multiplecollist=list(range(self.endcol, self.startcol+1))
             else:
-                self.multiplecollist=range(self.startcol, self.endcol+1)
+                self.multiplecollist=list(range(self.startcol, self.endcol+1))
             #print self.multiplecollist
         #draw the selected rows
         if self.endrow != self.startrow:
             if self.endrow < self.startrow:
-                self.multiplerowlist=range(self.endrow, self.startrow+1)
+                self.multiplerowlist=list(range(self.endrow, self.startrow+1))
             else:
-                self.multiplerowlist=range(self.startrow, self.endrow+1)
+                self.multiplerowlist=list(range(self.startrow, self.endrow+1))
             self.drawMultipleRows(self.multiplerowlist)
             self.tablerowheader.drawSelectedRows(self.multiplerowlist)
             #draw selected cells outline using row and col lists
@@ -1081,7 +1090,7 @@ class TableCanvas(Canvas):
     def formula_Dialog(self, row, col, currformula=None):
         """Formula dialog"""
         self.mode = 'formula'
-        print self.mode
+        print(self.mode)
         x1,y1,x2,y2 = self.getCellCoords(row,col)
         w=300
         h=h=self.rowheight * 3
@@ -1130,9 +1139,9 @@ class TableCanvas(Canvas):
         if len(self.multiplerowlist) == 0 or len(self.multiplecollist) == 0:
             return None
 
-        print rows, cols
+        print(rows, cols)
         if cols == None:
-            cols = range(self.cols)
+            cols = list(range(self.cols))
         for r in rows:
             #absr=self.get_AbsoluteRow(r)
             for c in cols:
@@ -1142,7 +1151,7 @@ class TableCanvas(Canvas):
 
     def paste(self, event=None):
         """Copy from clipboard"""
-        print self.parentframe.clipboard_get()
+        print(self.parentframe.clipboard_get())
         return
 
     def copyCell(self, rows, cols=None):
@@ -1192,8 +1201,8 @@ class TableCanvas(Canvas):
 
         model = self.getModel()
         if newColor == None:
-            import tkColorChooser
-            ctuple, newColor = tkColorChooser.askcolor(title='pick a color')
+            import tkinter.colorchooser
+            ctuple, newColor = tkinter.colorchooser.askcolor(title='pick a color')
             if newColor == None:
                 return
 
@@ -1203,9 +1212,9 @@ class TableCanvas(Canvas):
             rows.append(x)
         if self.allrows == True:
             #we use all rows if the whole column has been selected
-            rows = range(0,self.rows)
+            rows = list(range(0,self.rows))
         if cols == None:
-            cols = range(self.cols)
+            cols = list(range(self.cols))
         for col in cols:
             for row in rows:
                 #absrow = self.get_AbsoluteRow(row)
@@ -1260,7 +1269,7 @@ class TableCanvas(Canvas):
         def add_commands(fieldtype):
             """Add commands to popup menu for column type and specific cell"""
             functions = self.columnactions[fieldtype]
-            for f in functions.keys():
+            for f in list(functions.keys()):
                 func = getattr(self, functions[f])
                 popupmenu.add_command(label=f, command= lambda : func(row,col))
             return
@@ -1285,7 +1294,7 @@ class TableCanvas(Canvas):
                         popupmenu.add_command(label=action, command=defaultactions[action])
                 return
 
-            if self.columnactions.has_key(coltype):
+            if coltype in self.columnactions:
                 add_commands(coltype)
             add_defaultcommands()
 
@@ -1379,7 +1388,7 @@ class TableCanvas(Canvas):
 
     def plotSelected(self, graphtype='XY'):
         """Plot the selected data using pylab - if possible"""
-        from Plot import pylabPlotter
+        from .Plot import pylabPlotter
         if not hasattr(self, 'pyplot'):
             self.pyplot = pylabPlotter()
         plotdata = []
@@ -1410,7 +1419,7 @@ class TableCanvas(Canvas):
             self.pyplot = pylabPlotter()
         plotdata = self.getSelectionValues()
         if not self.pyplot.hasData() and plotdata != None:
-            print 'has data'
+            print('has data')
             plotdata = self.getSelectionValues()
             pltlabels = self.getplotlabels()
             self.pyplot.setDataSeries(pltlabels)
@@ -1445,7 +1454,7 @@ class TableCanvas(Canvas):
                 self.create_line(x,y_start,x,y_start+rows*h, tag='gridline',
                                      fill=self.grid_color, width=self.linewidth)
         if self.horizlines==1:
-            for row in range(startrow, endrow+1):
+            for row in range(int(startrow), int(endrow+1)):
                 y_pos=y_start+row*h
                 self.create_line(x_start,y_pos,self.tablewidth,y_pos, tag='gridline',
                                     fill=self.grid_color, width=self.linewidth)
@@ -1604,7 +1613,7 @@ class TableCanvas(Canvas):
         wrap = False
         pad=5
         # If celltxt is a number then we make it a string
-        if type(celltxt) is types.FloatType or type(celltxt) is types.IntType:
+        if type(celltxt) is float or type(celltxt) is int:
             celltxt=str(celltxt)
         length = len(celltxt)
         if length == 0:
@@ -1671,7 +1680,7 @@ class TableCanvas(Canvas):
     def isLink(self, cell):
         """Checks if cell is a hyperlink, without using isinstance"""
         try:
-            if cell.has_key('link'):
+            if 'link' in cell:
                 return True
         except:
             return False
@@ -1743,17 +1752,17 @@ class TableCanvas(Canvas):
         w=x2-x1
         text = self.model.getValueAt(row,col)
         if isinstance(text, dict):
-            if text.has_key('link'):
+            if 'link' in text:
                 text = text['link']
 
 
         # If text is a number we make it a string
-        if type(text) is types.FloatType or type is types.IntType:
+        if type(text) is float or type is int:
             text=str(text)
         if text == NoneType or text == '' or len(str(text))<=3:
             return
 
-        sfont = tkFont.Font (family='Arial', size=12,weight='bold')
+        sfont = tkinter.font.Font (family='Arial', size=12,weight='bold')
         obj = self.create_text(x1+w/1.5,y2,text=text,
                                 anchor='w',
                                 font=sfont,tag='tooltip')
@@ -1789,8 +1798,8 @@ class TableCanvas(Canvas):
         return
 
     def getaColor(self, oldcolor):
-        import tkColorChooser
-        ctuple, newcolor = tkColorChooser.askcolor(title='pick a color', initialcolor=oldcolor,
+        import tkinter.colorchooser
+        ctuple, newcolor = tkinter.colorchooser.askcolor(title='pick a color', initialcolor=oldcolor,
                                                    parent=self.parentframe)
         if ctuple == None:
             return None
@@ -1928,7 +1937,7 @@ class TableCanvas(Canvas):
         return self.prefswindow
 
     def getFonts(self):
-        fonts = set(list(tkFont.families()))
+        fonts = set(list(tkinter.font.families()))
         fonts = sorted(list(fonts))
         return fonts
 
@@ -1951,7 +1960,7 @@ class TableCanvas(Canvas):
                         'rowselectedcolor': self.rowselectedcolor,
                         'rowheaderwidth': self.rowheaderwidth}
 
-        for prop in defaultprefs.keys():
+        for prop in list(defaultprefs.keys()):
             try:
                 self.prefs.get(prop);
             except:
@@ -2028,8 +2037,8 @@ class TableCanvas(Canvas):
 
     def AskForColorButton(self, frame, text, func):
         def SetColor():
-            import tkColorChooser
-            ctuple, variable = tkColorChooser.askcolor(title='pick a color',
+            import tkinter.colorchooser
+            ctuple, variable = tkinter.colorchooser.askcolor(title='pick a color',
                                                        initialcolor=self.cellbackgr)
 
             return
@@ -2084,7 +2093,7 @@ class TableCanvas(Canvas):
 
     def new(self):
         """Clears all the data and makes a new table"""
-        from Dialogs import MultipleValDialog
+        from .Dialogs import MultipleValDialog
         mpDlg = MultipleValDialog(title='Create new table',
                                     initialvalues=(10, 4),
                                     labels=('rows','columns'),
@@ -2101,13 +2110,13 @@ class TableCanvas(Canvas):
     def load(self, filename=None):
         """load from a file"""
         if filename == None:
-            filename = tkFileDialog.askopenfilename(parent=self.master,
+            filename = tkinter.filedialog.askopenfilename(parent=self.master,
                                                       defaultextension='.table',
                                                       initialdir=os.getcwd(),
                                                       filetypes=[("pickle","*.table"),
                                                         ("All files","*.*")])
         if not os.path.exists(filename):
-            print 'file does not exist'
+            print('file does not exist')
             return
         if filename:
             self.model.load(filename)
@@ -2117,7 +2126,7 @@ class TableCanvas(Canvas):
     def save(self, filename=None):
         """Save model to pickle file"""
         if filename == None:
-            filename = tkFileDialog.asksaveasfilename(parent=self.master,
+            filename = tkinter.filedialog.asksaveasfilename(parent=self.master,
                                                         defaultextension='.table',
                                                         initialdir=os.getcwd(),
                                                         filetypes=[("pickle","*.table"),
@@ -2128,7 +2137,7 @@ class TableCanvas(Canvas):
 
     def importTable(self):
         """Import from csv file"""
-        from Tables_IO import TableImporter
+        from .Tables_IO import TableImporter
         importer = TableImporter()
         importdialog = importer.import_Dialog(self.master)
         self.master.wait_window(importdialog)
@@ -2139,7 +2148,7 @@ class TableCanvas(Canvas):
 
     def exportTable(self, filename=None):
         """Do a simple export of the cell contents to csv"""
-        from Tables_IO import TableExporter
+        from .Tables_IO import TableExporter
         exporter = TableExporter()
         exporter.ExportTableData(self)
         return
@@ -2150,7 +2159,7 @@ class TableCanvas(Canvas):
         ostyp=''
         var_s=['OSTYPE','OS']
         for var in var_s:
-            if os.environ.has_key(var):
+            if var in os.environ:
                 ostyp=string.lower(os.environ[var])
 
         ostyp=ostyp.lower()
@@ -2217,10 +2226,10 @@ class ColumnHeader(Canvas):
             return
         for col in self.table.visiblecols:
             colname=self.model.columnNames[col]
-            if not self.model.columnlabels.has_key(colname):
+            if colname not in self.model.columnlabels:
                 self.model.columnlabels[colname]=colname
             collabel = self.model.columnlabels[colname]
-            if self.model.columnwidths.has_key(colname):
+            if colname in self.model.columnwidths:
                 w = self.model.columnwidths[colname]
             else:
                 w = self.table.cellwidth
@@ -2363,9 +2372,9 @@ class ColumnHeader(Canvas):
         currcol = self.table.currentcol
         colclicked = self.table.get_col_clicked(event)
         if colclicked > currcol:
-            self.table.multiplecollist = range(currcol, colclicked+1)
+            self.table.multiplecollist = list(range(currcol, colclicked+1))
         elif colclicked < currcol:
-            self.table.multiplecollist = range(colclicked, currcol+1)
+            self.table.multiplecollist = list(range(colclicked, currcol+1))
         else:
             return
 
@@ -2397,10 +2406,10 @@ class ColumnHeader(Canvas):
 
     def relabel_Column(self):
         col=self.table.currentcol
-        ans = tkSimpleDialog.askstring("New column name?", "Enter new name:")
+        ans = tkinter.simpledialog.askstring("New column name?", "Enter new name:")
         if ans !=None:
             if ans == '':
-                tkMessageBox.showwarning("Error", "Name should not be blank.")
+                tkinter.messagebox.showwarning("Error", "Name should not be blank.")
                 return
             else:
                 self.model.relabel_Column(col, ans)
@@ -2569,9 +2578,9 @@ class RowHeader(Canvas):
         #draw the selected rows
         if self.endrow != self.startrow:
             if self.endrow < self.startrow:
-                rowlist=range(self.endrow, self.startrow+1)
+                rowlist=list(range(self.endrow, self.startrow+1))
             else:
-                rowlist=range(self.startrow, self.endrow+1)
+                rowlist=list(range(self.startrow, self.endrow+1))
             self.drawSelectedRows(rowlist)
             self.table.multiplerowlist = rowlist
             self.table.drawMultipleRows(rowlist)
@@ -2585,7 +2594,7 @@ class RowHeader(Canvas):
     def drawSelectedRows(self, rows=None):
         """Draw selected rows, accepts a list or integer"""
         self.delete('rect')
-        if type(rows) is not ListType:
+        if type(rows) != list:
             rowlist=[]
             rowlist.append(rows)
         else:
@@ -2628,8 +2637,8 @@ class AutoScrollbar(Scrollbar):
             self.grid()
         Scrollbar.set(self, lo, hi)
     def pack(self, **kw):
-        raise TclError, "cannot use pack with this widget"
+        raise TclError("cannot use pack with this widget")
     def place(self, **kw):
-        raise TclError, "cannot use place with this widget"
+        raise TclError("cannot use place with this widget")
 
 

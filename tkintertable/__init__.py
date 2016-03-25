@@ -21,7 +21,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from Tables import *
-from TableModels import *
+import tkintertable
+from tkintertable.Tables import *
+from tkintertable.TableModels import *
 
 __version__ = '1.2'
