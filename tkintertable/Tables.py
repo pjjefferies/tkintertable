@@ -1201,8 +1201,11 @@ class TableCanvas(Canvas):
 
         model = self.getModel()
         if newColor == None:
-            import tkinter.colorchooser
-            ctuple, newColor = tkinter.colorchooser.askcolor(title='pick a color')
+            try:
+                from tkColorChooser import askcolor
+            except ImportError:
+                from tkinter.colorchooser import askcolor
+            ctuple, newColor = askcolor(title='pick a color')
             if newColor == None:
                 return
 
@@ -1762,10 +1765,15 @@ class TableCanvas(Canvas):
         if text == NoneType or text == '' or len(str(text))<=3:
             return
 
-        sfont = tkinter.font.Font (family='Arial', size=12,weight='bold')
+        # try added by daniel because it goes wrong sometimes in the corpkit gui
+        try:
+            sfont = {'font': tkinter.font.Font (family='Arial', size=12,weight='bold')}
+        except AttributeError:
+            sfont = {}
         obj = self.create_text(x1+w/1.5,y2,text=text,
                                 anchor='w',
-                                font=sfont,tag='tooltip')
+                                tag='tooltip',
+                                **sfont)
 
         box = self.bbox(obj)
         x1=box[0]-1
@@ -1798,8 +1806,13 @@ class TableCanvas(Canvas):
         return
 
     def getaColor(self, oldcolor):
-        import tkinter.colorchooser
-        ctuple, newcolor = tkinter.colorchooser.askcolor(title='pick a color', initialcolor=oldcolor,
+
+        try:
+            from tkColorChooser import askcolor
+        except ImportError:
+            from tkinter.colorchooser import askcolor
+
+        ctuple, newcolor = askcolor(title='pick a color', initialcolor=oldcolor,
                                                    parent=self.parentframe)
         if ctuple == None:
             return None
@@ -2037,9 +2050,12 @@ class TableCanvas(Canvas):
 
     def AskForColorButton(self, frame, text, func):
         def SetColor():
-            import tkinter.colorchooser
-            ctuple, variable = tkinter.colorchooser.askcolor(title='pick a color',
-                                                       initialcolor=self.cellbackgr)
+            try:
+                from tkColorChooser import askcolor
+            except ImportError:
+                from tkinter.colorchooser import askcolor
+            ctuple, variable = askcolor(title='pick a color',
+                                        initialcolor=self.cellbackgr)
 
             return
         bgcolorbutton = Button(frame, text=text,command=SetColor)
