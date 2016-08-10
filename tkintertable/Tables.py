@@ -24,9 +24,9 @@ try:
 except:
     import tkinter as tkinter
     from tkinter import *
-from .TableModels import TableModel
-from .TableFormula import Formula
-from .Prefs import Preferences
+from tkintertable.TableModels import TableModel
+from tkintertable.TableFormula import Formula
+from tkintertable.Prefs import Preferences
 try:
     import tkMessageBox as messagebox
     import tkSimpleDialog as simpledialog
@@ -2252,7 +2252,7 @@ class ColumnHeader(Canvas):
             x=self.table.col_positions[col]
 
             if len(collabel)>w/10:
-                collabel=collabel[0:int(w)/12]+'.'
+                collabel=collabel[0:int(int(w)/12)]+'.'
             line = self.create_line(x, 0, x, h, tag=('gridline', 'vertline'),
                                  fill='white', width=2)
 
