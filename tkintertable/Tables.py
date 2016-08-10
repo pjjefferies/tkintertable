@@ -1760,9 +1760,9 @@ class TableCanvas(Canvas):
 
 
         # If text is a number we make it a string
-        if type(text) is float or type is int:
-            text=str(text)
-        if text == NoneType or text == '' or len(str(text))<=3:
+        if isinstance(text, (float, int)):
+            text = str(text)
+        if text is None or text == '' or len(str(text)) <= 3:
             return
 
         # try added by daniel because it goes wrong sometimes in the corpkit gui
