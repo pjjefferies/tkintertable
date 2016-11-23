@@ -176,9 +176,9 @@ class TableCanvas(Canvas):
         self.bind("<Return>", self.handle_arrow_keys)
         self.bind("<Tab>", self.handle_arrow_keys)
         #if 'windows' in self.platform:
-        self.bind("<MouseWheel>", self.mouse_wheel)
-        self.bind('<Button-4>', self.mouse_wheel)
-        self.bind('<Button-5>', self.mouse_wheel)
+        #self.bind("<MouseWheel>", self.mouse_wheel)
+        #self.bind('<Button-4>', self.mouse_wheel)
+        #self.bind('<Button-5>', self.mouse_wheel)
         self.focus_set()
         return
 
