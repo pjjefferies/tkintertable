@@ -1049,7 +1049,13 @@ class TableCanvas(Canvas):
         self.delete('tooltip')
         row = self.get_row_clicked(event)
         col = self.get_col_clicked(event)
-        if 0 <= row < self.rows and 0 <= col < self.cols:
+        if row is None:
+            row = 0
+        if col is None:
+            col = 0
+        srows = 0 if self.rows is None else self.rows
+        scols = 0 if self.cols is None else self.cols
+        if 0 <= row < srows and 0 <= col < scols:
             self.drawTooltip(row, col)
 
         return
