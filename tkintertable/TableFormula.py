@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     Module implements the Formula class for cell formulae.
     Created Oct 2008
@@ -19,32 +19,27 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-#import sys, os
-try:
-    import Tkinter as tkinter
-    from Tkinter import *
-except:
-    import tkinter as tkinter
-    from tkinter import *
-    
-from types import *
+# import sys, os
+# import tkinter as tk
+# from types import *
 import re
+
 
 class Formula(object):
     """A class to handle formulas functionality in the table"""
 
-    #replace symbols in recnames with strings for proper parsing
-    #replace = {'+':'plus', '-':'minus', '*':'mult',
+    # replace symbols in recnames with strings for proper parsing
+    # replace = {'+':'plus', '-':'minus', '*':'mult',
 
     def __init__(self):
-
         return
 
     @classmethod
     def isFormula(cls, rec):
         """Evaluate the cell and return true if its a formula"""
         isform = False
-        if type(rec) == dict:
+        # if type(rec) == dict:
+        if isinstance(rec, dict):
             if 'formula' in rec:
                 isform = True
         return isform
@@ -52,57 +47,63 @@ class Formula(object):
     @classmethod
     def getFormula(cls, rec):
         """Get the formula field string"""
-        if not type(rec) == dict:
+        # if not type(rec) == dict:
+        if not isinstance(rec, dict):
             return None
         string = rec['formula']
-        #print string
+        # print string
         return string
 
     @classmethod
     def readExpression(cls, expr):
-        """Get the operands and operators into lists from a string expression"""
+        """Get the operands and operators into lists from a
+        string expression"""
         ops = []
         vals = []
         p = re.compile('[()*/+-]')
         x = p.split(expr)
         ops = p.findall(expr)
-        #print expr, ops
+        # print expr, ops
         for i in x:
             if i == '':
                 vals.append(i)
             else:
-                vals.append(eval(i))
+                try:
+                    vals.append(eval(i))
+                except NameError:
+                    vals.append(0)
 
-        #print ops, vals
+        # print ops, vals
         return vals, ops
 
     @classmethod
     def doExpression(cls, vals, ops, getvalues=True):
         """Create an expression string from provided operands and operators"""
         expr = ''
-        if getvalues == True:
-            for i in range(len(vals)):
+        if getvalues:
+            # for i in range(len(vals)):
+            for i, _ in enumerate(vals):
                 if vals[i] != '':
                     vals[i] = float(vals[i])
-        if len(ops)>len(vals):
+        if len(ops) > len(vals):
             while len(ops):
-                #use lists as queues
+                # use lists as queues
                 expr += ops.pop(0)
-                if len(vals)!=0:
-                    v=vals.pop(0)
+                if len(vals) != 0:
+                    v = vals.pop(0)
                     if v == '':
                         pass
                     else:
                         expr += str(v)
-        elif len(ops)<len(vals):
+        elif len(ops) < len(vals):
             while len(vals):
-                #use lists as queues
-                v=vals.pop(0)
+                # use lists as queues
+                v = vals.pop(0)
                 if v == '':
                     pass
                 else:
                     expr += str(v)
-                if len(ops)!=0:
+                if len(ops) != 0:
                     expr += ops.pop(0)
         return expr
 
@@ -110,36 +111,36 @@ class Formula(object):
     def doFormula(cls, cellformula, data):
         """Evaluate the formula for a cell and return the result
            takes a formula dict or just the string as input"""
-        if type(cellformula) == dict:
+        # if type(cellformula) == dict:
+        if isinstance(cellformula, dict):
             cellformula = cellformula['formula']
 
         vals = []
         cells, ops = cls.readExpression(cellformula)
 
-        #get cell records into their values
+        # get cell records into their values
         for i in cells:
-            if type(i) is ListType:
-                recname, col= i
+            if isinstance(i, list):
+                recname, col = i
                 if recname in data:
                     if col in data[recname]:
                         v = data[recname][col]
                         if cls.isFormula(v):
-                            #recursive
-                            v = cls.doFormula(cls.getFormula(v),data)
+                            # recursive
+                            v = cls.doFormula(cls.getFormula(v), data)
                         vals.append(v)
                     else:
                         return ''
                 else:
                     return ''
-            elif i== '' or type(i) is IntType or type(i) is FloatType:
+            elif i == '' or isinstance(i, (int, float)):
                 vals.append(i)
             else:
                 return ''
         if vals == '':
             return ''
-        #print vals, ops
+        # print vals, ops
         expr = cls.doExpression(vals, ops)
-        #print 'expr', expr
+        # print 'expr', expr
         result = eval(expr)
-        return str(round(result,3))
-
+        return str(round(result, 3))

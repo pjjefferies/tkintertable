@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """
 
-    This set of classes allows interactive spreadsheet-style tables to be added into
-    an application.
+    This set of classes allows interactive spreadsheet-style tables to be added
+    into an application.
     Created January 2008
     Custom Table Package
     Copyright (C) Damien Farrell

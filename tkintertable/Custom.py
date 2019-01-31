@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     Custom Table sub-class illustrate table functionality.
     Created January 2008
@@ -19,18 +19,18 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-from .Tables import TableCanvas, ColumnHeader
+from Tables import TableCanvas
+# from Tables import ColumnHeader
+
 
 class MyTable(TableCanvas):
-     """Sub-class of Tablecanvas, with some changes in behaviour to make
-        a customised table - just an example"""
-     def __init__(self, parent=None, model=None):
-         TableCanvas.__init__(self, parent, model)
-         self.cellbackgr = '#FFFAF0'
-         self.entrybackgr = 'white'
-
-         self.selectedcolor = 'yellow'
-         self.rowselectedcolor = '#B0E0E6'
-         self.multipleselectioncolor = '#ECD672'
-
-         return
+    """Sub-class of Tablecanvas, with some changes in behaviour to make
+       a customised table - just an example"""
+    def __init__(self, parent=None, model=None):
+        TableCanvas.__init__(self, parent, model)
+        self.cellbackgr = '#FFFAF0'
+        self.entrybackgr = 'white'
+        self.selectedcolor = 'yellow'
+        self.rowselectedcolor = '#B0E0E6'
+        self.multipleselectioncolor = '#ECD672'
+        return

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     Table Testing module.
     Created Oct 2008
@@ -17,60 +17,62 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Testing general functionality of tables
 """
 
-import random, string
-try:
-    import Tkinter as tkinter
-    from Tkinter import *
-except:
-    import tkinter as tkinter
-    from tkinter import *
-from .Tables import TableCanvas
-from .TableModels import TableModel
+import random
+import string
+import tkinter as tk
+from Tables import TableCanvas
+from TableModels import TableModel
 
-"""Testing general functionality of tables"""
 
 class App:
+    """ tkinter wrapper for tests """
     def __init__(self, master):
-        self.main = Frame(master)
-        self.main.pack(fill=BOTH,expand=1)
+        self.main = tk.Frame(master)
+        self.main.pack(fill='both', expand=1)
         master.geometry('600x400+200+100')
 
-def createRandomStrings(l,n):
+
+def createRandomStrings(l, n):
     """create list of l random strings, each of length n"""
     names = []
-    for i in range(l):
+    for _ in range(l):
         val = ''.join(random.choice(string.ascii_lowercase) for x in range(n))
         names.append(val)
     return names
+
 
 def createData(rows=20, cols=5):
     """Creare random dict for test data"""
 
     data = {}
-    names = createRandomStrings(rows,16)
-    colnames = createRandomStrings(cols,5)
+    names = createRandomStrings(rows, 16)
+    colnames = createRandomStrings(cols, 5)
     for n in names:
-        data[n]={}
+        data[n] = {}
         data[n]['label'] = n
-    for c in range(0,cols):
-        colname=colnames[c]
-        vals = [round(random.normalvariate(100,50),2) for i in range(0,len(names))]
+    for c in range(0, cols):
+        colname = colnames[c]
+        vals = [round(random.normalvariate(100, 50), 2)
+                for i in range(0, len(names))]
         vals = sorted(vals)
-        i=0
-        for n in names:
+        for i, n in enumerate(names):
             data[n][colname] = vals[i]
-            i+=1
     return data
 
+
 def createTable(model):
-    t=Toplevel()
+    """ create table """
+    t = tk.Toplevel()
     app = App(t)
     master = app.main
-    table = TableCanvas(master, model,rowheaderwidth=50)
+    table = TableCanvas(master, model, rowheaderwidth=50)
     table.createTableFrame()
     return table
+
 
 def test1(root):
     """Setup a table and populate it with data"""
@@ -78,59 +80,64 @@ def test1(root):
     master = app.main
     model = TableModel()
     data = createData(40)
-    #import after model created
-    #print data
+    # import after model created
+    # print data
     model.importDict(data)
     table = TableCanvas(master, model,
                         cellwidth=60, cellbackgr='#e3f698',
-                        thefont=('Arial',12),rowheight=18, rowheaderwidth=30,
+                        thefont=('Arial', 12), rowheight=18, rowheaderwidth=30,
                         rowselectedcolor='yellow', editable=True)
     table.createTableFrame()
-    #table.sortTable(columnName='label')
-    #remove cols
+    # table.sortTable(columnName='label')
+    # remove cols
     model.deleteColumns([0])
-    model.deleteRows(list(range(0,2)))
-    #table.redrawTable()
-    #add rows and cols
-    table.addRow(1,label='aaazzz')
+    model.deleteRows(list(range(0, 2)))
+    # table.redrawTable()
+    # add rows and cols
+    table.addRow(1, label='aaazzz')
     table.addRow(label='bbb')
-    table.addRow(**{'label':'www'})
+    table.addRow(**{'label': 'www'})
     table.addColumn('col6')
-    model.data[1]['col6']='TEST'
-    #table.redrawTable()
-    #change col labels
+    model.data[1]['col6'] = 'TEST'
+    # table.redrawTable()
+    # change col labels
     model.columnlabels['col6'] = 'new label'
-    #set and get selections
+    # set and get selections
     table.setSelectedRow(2)
     table.setSelectedCol(1)
-    table.setSelectedCells(1,80,2,4)
-    #print table.getSelectionValues()
-    #table.plotSelected(graphtype='XY')
-    #save data
-    #table.addRows(50000)
+    table.setSelectedCells(1, 80, 2, 4)
+    # print table.getSelectionValues()
+    # table.plotSelected(graphtype='XY')
+    # save data
+    # table.addRows(50000)
     model.save('test.table')
-    #load new data
+    # load new data
     table.load('test.table')
-    #root.after(2000, root.quit)
+    # root.after(2000, root.quit)
     return
+
 
 def test2():
     """Multuple tables in one window"""
-    t=Toplevel()
+    t = tk.Toplevel()
     app = App(t)
     master = app.main
-    c=0; r=1
-    for i in range(12):
+    c = 0
+    r = 1
+    for _ in range(12):
         model = TableModel()
         data = createData(50)
         model.importDict(data)
-        fr = Frame(master)
-        if c%3==0: c=0; r+=1
-        fr.grid(row=r,column=c,sticky='nws')
-        table = TableCanvas(fr, model, width=250,height=150,rowheaderwidth=0)
+        fr = tk.Frame(master)
+        if c % 3 == 0:
+            c = 0
+            r += 1
+        fr.grid(row=r, column=c, sticky='nws')
+        table = TableCanvas(fr, model, width=250, height=150, rowheaderwidth=0)
         table.createTableFrame()
-        c+=1
+        c += 1
     return
+
 
 def test3():
     """Drawing large tables"""
@@ -140,6 +147,7 @@ def test3():
     createTable(model)
     return
 
+
 def test4():
     """Filtering/searching"""
     model = TableModel()
@@ -147,49 +155,52 @@ def test4():
     model.importDict(data)
     model.addColumn('comment')
     for i in model.reclist:
-        val = random.sample(['a','b','c'],1)[0]
+        val = random.sample(['a', 'b', 'c'], 1)[0]
         model.data[i]['comment'] = val
-    #searchterms = [('label', 'aa', 'contains', 'AND'),
-    #               ('label', 'bb', 'contains', 'OR')]
+    # searchterms = [('label', 'aa', 'contains', 'AND'),
+    #                ('label', 'bb', 'contains', 'OR')]
     searchterms = [('comment', 'a', '!=', 'AND'),
                    ('comment', 'b', '!=', 'AND')]
     vals = model.getColumnData(columnIndex=0, filters=searchterms)
-    #model.getColumns(model.columnNames, filters=searchterms)
-    #model.getDict(model.columnNames, filters=searchterms)
-    print('%s found' %len(vals))
-    #createTable(model)
+    # model.getColumns(model.columnNames, filters=searchterms)
+    # model.getDict(model.columnNames, filters=searchterms)
+    print('{0:0d} found'.format(len(vals)))
+    # createTable(model)
     return
+
 
 def test5():
     """frame placement"""
     import Pmw
-    t=Toplevel()
+    t = tk.Toplevel()
     app = App(t)
     master = app.main
     w = Pmw.Group(master,
-                tag_text='Show/Hide')
-    w.pack(fill=BOTH)
-    f=Frame(master)
-    f.pack(fill=BOTH)
+                  tag_text='Show/Hide')
+    w.pack(fill='both')
+    f = tk.Frame(master)
+    f.pack(fill='both')
     table = TableCanvas(w)
     table.createTableFrame()
     return
 
+
 def GUITests():
     """Run standard tests"""
-    root = Tk()
+    root = tk.Tk()
     test1(root)
     test2()
     test3()
     test4()
-    #test5()
+    # test5()
     print('GUI tests done')
     return root
+
 
 def main():
     root = GUITests()
     root.mainloop()
-    #loadSaveTest()
+    # loadSaveTest()
 
 if __name__ == '__main__':
     main()

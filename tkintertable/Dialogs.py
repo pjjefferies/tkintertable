@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     Table Dialog classes.
     Created Oct 2008
@@ -19,20 +19,18 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-try:
-    import Tkinter as tkinter
-    from Tkinter import *
-except:
-    import tkinter as tkinter
-    from tkinter import *
-import types
-import tkinter.simpledialog, tkinter.filedialog, tkinter.messagebox
+import tkinter as tk
+# import types
+# import tkinter.simpledialog
+# import tkinter.filedialog
+# import tkinter.messagebox
 
-class RecordViewDialog(tkinter.simpledialog.Dialog):
+
+class RecordViewDialog(tk.simpledialog.Dialog):
     """Dialog for viewing and editing table records"""
 
     def __init__(self, parent, title=None, table=None, row=None):
-        if table != None:
+        if table is not None:
             self.table = table
             self.model = table.getModel()
             self.row = row
@@ -40,37 +38,43 @@ class RecordViewDialog(tkinter.simpledialog.Dialog):
             self.recname = self.model.getRecName(row)
         else:
             return
-        tkinter.simpledialog.Dialog.__init__(self, parent, title)
-        return
+        tk.simpledialog.Dialog.__init__(self, parent, title)
+        self.result = None
+        self.results = None
 
     def body(self, master):
         """Show all record fields in entry fields or labels"""
-        model = self.model
+        # model = self.model
         cols = list(self.recdata.keys())
         self.editable = []
         self.fieldnames = {}
         self.fieldvars = {}
-        self.fieldvars['Name'] = StringVar()
+        self.fieldvars['Name'] = tk.StringVar()
         self.fieldvars['Name'].set(self.recname)
-        Label(master, text='Rec Name:').grid(row=0,column=0,padx=2,pady=2,sticky='news')
-        Entry(master, textvariable=self.fieldvars['Name'],
-                relief=GROOVE,bg='yellow').grid(row=0,column=1,padx=2,pady=2,sticky='news')
-        i=1
-        for col in cols:
-            self.fieldvars[col] = StringVar()
+        tk.Label(master, text='Rec Name:').grid(row=0, column=0,
+                                                padx=2, pady=2,
+                                                sticky='news')
+        tk.Entry(master, textvariable=self.fieldvars['Name'],
+                 relief='groove', bg='yellow').grid(row=0, column=1,
+                                                    padx=2, pady=2,
+                                                    sticky='news')
+        # i=1
+        for i, col in enumerate(cols, 1):
+            self.fieldvars[col] = tk.StringVar()
             if col in self.recdata:
                 val = self.recdata[col]
                 self.fieldvars[col].set(val)
-            self.fieldnames[col] = Label(master, text=col).grid(row=i,column=0,padx=2,pady=2,sticky='news')
-            ent = Entry(master, textvariable=self.fieldvars[col], relief=GROOVE,bg='white')
-            ent.grid(row=i,column=1,padx=2,pady=2,sticky='news')
-            if not type(self.recdata[col]) is bytes:
-                ent.config(state=DISABLED)
+            self.fieldnames[col] = tk.Label(master, text=col).grid(
+                row=i, column=0, padx=2, pady=2, sticky='news')
+            ent = tk.Entry(master, textvariable=self.fieldvars[col],
+                           relief='groove', bg='white')
+            ent.grid(row=i, column=1, padx=2, pady=2, sticky='news')
+            if not isinstance(self.recdata[col], bytes):
+                ent.config(state='disabled')
             else:
                 self.editable.append(col)
-            i+=1
-        top=self.winfo_toplevel()
-        top.columnconfigure(1,weight=1)
+        top = self.winfo_toplevel()
+        top.columnconfigure(1, weight=1)
         return
 
     def apply(self):
@@ -84,66 +88,73 @@ class RecordViewDialog(tkinter.simpledialog.Dialog):
 
         for col in range(cols):
             colname = model.getColumnName(col)
-            if not colname in self.editable:
+            if colname not in self.editable:
                 continue
             if colname not in self.fieldvars:
                 continue
             val = self.fieldvars[colname].get()
             model.setValueAt(val, absrow, col)
-            #print 'changed field', colname
+            # print 'changed field', colname
 
         self.table.redrawTable()
         return
 
-class MultipleValDialog(tkinter.simpledialog.Dialog):
+
+class MultipleValDialog(tk.simpledialog.Dialog):
     """Simple dialog to get multiple values"""
 
-    def __init__(self, parent, title=None, initialvalues=None, labels=None, types=None):
-        if labels != None and types != NoneType:
+    def __init__(self, parent, title=None, initialvalues=None,
+                 labels=None, types=None):
+        if labels is not None and types is not None:
             self.initialvalues = initialvalues
             self.labels = labels
             self.types = types
-        tkinter.simpledialog.Dialog.__init__(self, parent, title)
+        tk.simpledialog.Dialog.__init__(self, parent, title)
 
     def body(self, master):
-
-        r=0
-        self.vrs=[];self.entries=[]
+        # r = 0
+        self.vrs = []
+        self.entries = []
         for i in range(len(self.labels)):
-            Label(master, text=self.labels[i]).grid(row=r, column=0,sticky='news')
+            tk.Label(
+                master,
+                # text=self.labels[i]).grid(row=r, column=0, sticky='news')
+                text=self.labels[i]).grid(row=i, column=0, sticky='news')
             if self.types[i] == 'int':
-                self.vrs.append(IntVar())
+                self.vrs.append(tk.IntVar())
             else:
-                self.vrs.append(StringVar())
+                self.vrs.append(tk.StringVar())
             if self.types[i] == 'password':
-                s='*'
+                show = '*'
             else:
-                s=None
+                show = None
 
             if self.types[i] == 'list':
-                button=Menubutton(master, textvariable=self.vrs[i],relief=RAISED)
-                menu=Menu(button,tearoff=0)
-                button['menu']=menu
-                choices=self.initialvalues[i]
-                for c in choices:
-                    menu.add_radiobutton(label=c,
-                                        variable=self.vrs[i],
-                                        value=c,
-                                        indicatoron=1)
+                button = tk.Menubutton(master,
+                                       textvariable=self.vrs[i],
+                                       relief='raised')
+                menu = tk.Menu(button, tearoff=False)
+                button['menu'] = menu
+                choices = self.initialvalues[i]
+                for choice in choices:
+                    menu.add_radiobutton(label=choice,
+                                         variable=self.vrs[i],
+                                         value=choice,
+                                         indicatoron=True)
                 self.entries.append(button)
                 self.vrs[i].set(self.initialvalues[i][0])
             else:
                 self.vrs[i].set(self.initialvalues[i])
-                self.entries.append(Entry(master, textvariable=self.vrs[i], show=s, bg='white'))
-            self.entries[i].grid(row=r, column=1,padx=2,pady=2,sticky='news')
-            r+=1
-
-        return self.entries[0] # initial focus
+                self.entries.append(tk.Entry(master, textvariable=self.vrs[i],
+                                             show=show, bg='white'))
+            # self.entries[i].grid(row=r, column=1, padx=2, pady=2,
+            self.entries[i].grid(row=i, column=1, padx=2, pady=2,
+                                 sticky='news')
+            # r += 1
+        return self.entries[0]  # initial focus
 
     def apply(self):
         self.result = True
         self.results = []
         for i in range(len(self.labels)):
             self.results.append(self.vrs[i].get())
-        return
-

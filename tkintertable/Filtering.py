@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     Module implements Table filtering and searching functionality.
     Created Oct 2008
@@ -19,73 +19,111 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-try:
-    import Tkinter as tkinter
-    from Tkinter import *
-except:
-    import tkinter as tkinter
-    from tkinter import *
-import Pmw
-from types import *
 import re
+import tkinter as tk
+import Pmw
+# from types import *
 
-def contains(v1,v2):
+
+def contains(v1, v2):
+    """
     if v1 in v2:
         return True
+    """
+    return v1 in v2
+
 
 def excludes(v1, v2):
+    """
     if not v1 in v2:
         return True
+    """
+    return v1 not in v2
 
-def equals(v1,v2):
+
+def equals(v1, v2):
+    """
     if v1==v2:
         return True
+    """
+    return v1 == v2
 
-def notequals(v1,v2):
+
+def notequals(v1, v2):
+    """
     if v1!=v2:
         return True
+    """
+    return v1 != v2
 
-def greaterthan(v1,v2):
+
+def greaterthan(v1, v2):
+    """
     if v2>v1:
         return True
     return False
+    """
+    return v2 > v1
 
-def lessthan(v1,v2):
+
+def lessthan(v1, v2):
+    """
     if v2<v1:
         return True
     return False
+    """
+    return v2 < v1
 
-def startswith(v1,v2):
+
+def startswith(v1, v2):
+    """
     if v2.startswith(v1):
         return True
+    """
+    return v2.startswith(v1)
 
-def endswith(v1,v2):
+
+def endswith(v1, v2):
+    """
     if v2.endswith(v1):
         return True
+    """
+    return v2.endswith(v1)
 
-def haslength(v1,v2):
+
+def haslength(v1, v2):
+    """
     if len(v2)>v1:
         return True
+    """
+    return len(v2) > v1
 
-def isnumber(v1,v2):
+
+def isnumber(v1, v2):
+    """ is it a number, v2 for some reason """
     try:
         float(v2)
         return True
-    except:
+    except (ValueError, TypeError):
         return False
 
-def regex(v1,v2):
+
+def regex(v1, v2):
     """Apply a regular expression"""
-    print(re.findall(v1,v2))
+    print(re.findall(v1, v2))
     return
 
-operatornames = {'=':equals,'!=':notequals,
-                   'contains':contains,'excludes':excludes,
-                   '>':greaterthan,'<':lessthan,
-                   'starts with':startswith,
-                   'ends with':endswith,
-                   'has length':haslength,
-                   'is number':isnumber}
+operatornames = {'=': equals,
+                 '!=': notequals,
+                 'contains': contains,
+                 'excludes': excludes,
+                 '>': greaterthan,
+                 '<': lessthan,
+                 'starts with': startswith,
+                 'ends with': endswith,
+                 'has length': haslength,
+                 'is number': isnumber}
+
 
 def doFiltering(searchfunc, filters=None):
     """Module level method. Filter recs by several filters using a user provided
@@ -93,7 +131,7 @@ def doFiltering(searchfunc, filters=None):
        filters is a list of tuples of the form (key,value,operator,bool)
        returns: found record keys"""
 
-    if filters == None:
+    if filters is None:
         return
     F = filters
     sets = []
@@ -103,39 +141,43 @@ def doFiltering(searchfunc, filters=None):
         sets.append((set(names), boolean))
     names = sets[0][0]
     for s in sets[1:]:
-        b=s[1]
+        b = s[1]
         if b == 'AND':
             names = names & s[0]
         elif b == 'OR':
             names = names | s[0]
         elif b == 'NOT':
             names = names - s[0]
-        #print len(names)
+        # print len(names)
     names = list(names)
     return names
 
-class FilterFrame(Frame):
 
+class FilterFrame(tk.Frame):
+    """Create a filtering gui frame.
+    Callback must be some method that can accept tuples of filter
+    parameters connected by boolean operators """
     def __init__(self, parent, fields, callback=None, closecallback=None):
-        """Create a filtering gui frame.
-        Callback must be some method that can accept tuples of filter
-        parameters connected by boolean operators """
-        Frame.__init__(self, parent)
+        tk.Frame.__init__(self, parent)
         self.parent = parent
         self.callback = callback
         self.closecallback = closecallback
         self.fields = fields
         self.filters = []
         self.addFilterBar()
-        addbutton=Button(self,text='Go', command=self.callback,bg='lightblue')
-        addbutton.grid(row=0,column=0,sticky='news',padx=2,pady=2)
-        addbutton=Button(self,text='+Add Filter', command=self.addFilterBar)
-        addbutton.grid(row=0,column=1,sticky='news',padx=2,pady=2)
-        cbutton=Button(self,text='Close', command=self.close)
-        cbutton.grid(row=0,column=2,sticky='news',padx=2,pady=2)
-        self.resultsvar=IntVar()
-        Label(self,text='found:').grid(row=0,column=3,sticky='nes')
-        Label(self,textvariable=self.resultsvar).grid(row=0,column=4,sticky='nws',padx=2,pady=2)
+        addbutton = tk.Button(self, text='Go',
+                              command=self.callback, bg='lightblue')
+        addbutton.grid(row=0, column=0, sticky='news', padx=2, pady=2)
+        addbutton = tk.Button(self, text='+Add Filter',
+                              command=self.addFilterBar)
+        addbutton.grid(row=0, column=1, sticky='news', padx=2, pady=2)
+        cbutton = tk.Button(self, text='Close', command=self.close)
+        cbutton.grid(row=0, column=2, sticky='news', padx=2, pady=2)
+        self.resultsvar = tk.IntVar()
+        tk.Label(self, text='found:').grid(row=0, column=3, sticky='nes')
+        tk.Label(self, textvariable=self.resultsvar).grid(row=0, column=4,
+                                                          sticky='nws',
+                                                          padx=2, pady=2)
         return
 
     def addFilterBar(self):
@@ -143,7 +185,8 @@ class FilterFrame(Frame):
         index = len(self.filters)
         f = FilterBar(self, index, self.fields)
         self.filters.append(f)
-        f.grid(row=index+1,column=0,columnspan=5,sticky='news',padx=2,pady=2)
+        f.grid(row=index+1, column=0, columnspan=5, sticky='news',
+               padx=2, pady=2)
         return
 
     def close(self):
@@ -153,7 +196,8 @@ class FilterFrame(Frame):
         return
 
     def doFiltering(self, searchfunc):
-        F=[]
+        """ Do a filter """
+        F = []
         for f in self.filters:
             F.append(f.getFilter())
         names = doFiltering(searchfunc, F)
@@ -161,51 +205,55 @@ class FilterFrame(Frame):
         return names
 
     def updateResults(self, i):
+        """ Update Results """
         self.resultsvar.set(i)
         return
 
-class FilterBar(Frame):
+
+class FilterBar(tk.Frame):
     """Class providing filter widgets"""
-    operators = ['contains','excludes','=','!=','>','<','starts with',
-                 'ends with','has length','is number']
-    booleanops = ['AND','OR','NOT']
+    operators = ['contains', 'excludes', '=', '!=', '>', '<', 'starts with',
+                 'ends with', 'has length', 'is number']
+    booleanops = ['AND', 'OR', 'NOT']
+
     def __init__(self, parent, index, fields):
-        Frame.__init__(self, parent)
-        self.parent=parent
+        tk.Frame.__init__(self, parent)
+        self.parent = parent
         self.index = index
-        self.filtercol=StringVar()
+        self.filtercol = tk.StringVar()
         initial = fields[0]
         filtercolmenu = Pmw.OptionMenu(self,
-                labelpos = 'w',
-                label_text = 'Column:',
-                menubutton_textvariable = self.filtercol,
-                items = fields,
-                initialitem = initial,
-                menubutton_width = 10)
-        filtercolmenu.grid(row=0,column=1,sticky='news',padx=2,pady=2)
-        self.operator=StringVar()
+                                       labelpos='w',
+                                       label_text='Column:',
+                                       menubutton_textvariable=self.filtercol,
+                                       items=fields,
+                                       initialitem=initial,
+                                       menubutton_width=10)
+        filtercolmenu.grid(row=0, column=1, sticky='news', padx=2, pady=2)
+        self.operator = tk.StringVar()
         operatormenu = Pmw.OptionMenu(self,
-                menubutton_textvariable = self.operator,
-                items = self.operators,
-                initialitem = 'contains',
-                menubutton_width = 8)
-        operatormenu.grid(row=0,column=2,sticky='news',padx=2,pady=2)
-        self.filtercolvalue=StringVar()
-        valsbox=Entry(self,textvariable=self.filtercolvalue,width=20,bg='white')
-        valsbox.grid(row=0,column=3,sticky='news',padx=2,pady=2)
+                                      menubutton_textvariable=self.operator,
+                                      items=self.operators,
+                                      initialitem='contains',
+                                      menubutton_width=8)
+        operatormenu.grid(row=0, column=2, sticky='news', padx=2, pady=2)
+        self.filtercolvalue = tk.StringVar()
+        valsbox = tk.Entry(self, textvariable=self.filtercolvalue,
+                           width=20, bg='white')
+        valsbox.grid(row=0, column=3, sticky='news', padx=2, pady=2)
         valsbox.bind("<Return>", self.parent.callback)
-        self.booleanop=StringVar()
+        self.booleanop = tk.StringVar()
         booleanopmenu = Pmw.OptionMenu(self,
-                menubutton_textvariable = self.booleanop,
-                items = self.booleanops,
-                initialitem = 'AND',
-                menubutton_width = 6)
-        booleanopmenu.grid(row=0,column=0,sticky='news',padx=2,pady=2)
-        #disable the boolean operator if it's the first filter
+                                       menubutton_textvariable=self.booleanop,
+                                       items=self.booleanops,
+                                       initialitem='AND',
+                                       menubutton_width=6)
+        booleanopmenu.grid(row=0, column=0, sticky='news', padx=2, pady=2)
+        # disable the boolean operator if it's the first filter
         if self.index == 0:
-            booleanopmenu.component('menubutton').configure(state=DISABLED)
-        cbutton=Button(self,text='-', command=self.close)
-        cbutton.grid(row=0,column=5,sticky='news',padx=2,pady=2)
+            booleanopmenu.component('menubutton').configure(state='disabled')
+        cbutton = tk.Button(self, text='-', command=self.close)
+        cbutton.grid(row=0, column=5, sticky='news', padx=2, pady=2)
         return
 
     def close(self):
@@ -221,5 +269,3 @@ class FilterBar(Frame):
         op = self.operator.get()
         booleanop = self.booleanop.get()
         return col, val, op, booleanop
-
-
